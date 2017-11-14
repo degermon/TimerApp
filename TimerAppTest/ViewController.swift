@@ -9,10 +9,16 @@
 import UIKit
 
 class ViewController: UIViewController, UITextFieldDelegate {
-
+    
     var timer = Timer()
     var number : Int = 0
     var state : Bool = true
+    var date = Date()
+    var result1 : [Int] = []
+    var result2 : [Int] = []
+    var globalH : Int? = nil
+    var globalM : Int? = nil
+    var globalS : Int? = nil
     
     @IBOutlet weak var timerWarningLabel: UILabel!
     @IBOutlet weak var label: UILabel!
@@ -23,8 +29,10 @@ class ViewController: UIViewController, UITextFieldDelegate {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         timerWarningLabel.isHidden = true
+        inputTextField.placeholder = "0000"
+        dateTimeTextField.placeholder = "00:00:00"
     }
-
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
@@ -47,14 +55,14 @@ class ViewController: UIViewController, UITextFieldDelegate {
     // Mark: Timers
     
     func sTimer() {
-    timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(updateTimer), userInfo: nil, repeats: true)
+        timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(updateTimer), userInfo: nil, repeats: true)
     }
     
     @objc func updateTimer() {
         check()
         if state == true {
-        number -= 1
-        label.text = String(number)
+            number -= 1
+            label.text = String(number)
         }
     }
     
@@ -76,21 +84,58 @@ class ViewController: UIViewController, UITextFieldDelegate {
         return false
     }
     
-    //MARK: Text Field Delegate Methods
-
-  /*  func textFieldDidEndEditing(_ textField: UITextField) {
-            label.text = inputTextField.text
-            if let a = Int(inputTextField.text!) {
-                number = a
+    func convertDateTime(text: String) -> [Int] {
+        guard let text = dateTimeTextField.text, (0..<9).contains(text.count) else {
+            return []
+        } //escaping empty UITextField and the length
+        let splitText = text.split(separator: ":")
+        var timeArray : [Int] = []
+        let values = text.split(separator: ":")
+        guard values.count == 3 else {
+            return []
         }
-        print("hoooli", textField)
+        for item in splitText {
+            if let a = Int(item) {
+                timeArray.append(a)
+            }
+        }
+        return timeArray
+    }
+ 
+    func getTodayString() -> String? {
+        
+        let date = Date()
+        let calender = Calendar.current
+        let components = calender.dateComponents([.year,.month,.day,.hour,.minute,.second], from: date)
+        /*
+        let year = components.year
+        let month = components.month
+        let day = components.day */
+        let hour = components.hour
+        let minute = components.minute
+        let second = components.second
+        //  let today_string = String(year!) + "-" + String(month!) + "-" + String(day!) + " " + String(hour!)  + ":" + String(minute!) + ":" +  String(second!)
+        let today_string = String(hour!)  + ":" + String(minute!) + ":" +  String(second!)
+        
+        return today_string
+        
     }
     
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        textField.resignFirstResponder()
-        
-        return true
-    } */
+    //MARK: Text Field Delegate Methods
+    
+    /*  func textFieldDidEndEditing(_ textField: UITextField) {
+     label.text = inputTextField.text
+     if let a = Int(inputTextField.text!) {
+     number = a
+     }
+     print("hoooli", textField)
+     }
+     
+     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+     textField.resignFirstResponder()
+     
+     return true
+     } */
     
     func textFieldDidBeginEditing(_ textField: UITextField) {
         print("TextField did begin editing method called")
@@ -104,14 +149,30 @@ class ViewController: UIViewController, UITextFieldDelegate {
                 number = a
             }
         }
-        /*label.text = inputTextField.text
-        if let a = Int(inputTextField.text!) {
-            number = a
+        if let a = dateTimeTextField.text {
+            result1 = convertDateTime(text: a)
+            if result1.count == 3 {
+                globalH = result1[0]
+                globalM = result1[1]
+                globalS = result1[2]
+            }
+            //let b = getTodayString()
+            //result2 = convertDateTime(text: getTodayString())
+            
         }
-        print("hoooli", textField) */
+        if let a = getTodayString() {
+            print(a)
+            result2 = convertDateTime(text: a)
+        }
+        print(result1, result2)
+        print(result1)
+        print(result2)
+        //print(getTodayString())
     }
     func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
         print("TextField should begin editing method called")
+        dateTimeTextField.text = ""
+        inputTextField.text = ""
         return true;
     }
     func textFieldShouldClear(_ textField: UITextField) -> Bool {
